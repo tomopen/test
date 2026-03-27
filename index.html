@@ -26,12 +26,13 @@
         .btn-mint:hover { background-color: #FF1493; transform: translateY(-2px); }
         .btn-mint:disabled { background-color: #CCC; cursor: not-allowed; box-shadow: none; }
         #statusMessage { margin-top: 15px; font-size: 14px; color: #666; min-height: 1.2em; }
-        .error-text { color: #D32F2F; }
     </style>
 </head>
 <body>
     <div class="mint-card">
-        <div class="image-container"><img src="index.jpg" alt="JapaneseTinyPenpen NFT" class="nft-image"></div>
+        <div class="image-container">
+            <img src="https://raw.githubusercontent.com/t-shiori/shiori-puni/main/index.jpg" alt="JapaneseTinyPenpen NFT" class="nft-image">
+        </div>
         <div class="card-content">
             <div class="project-name">JapaneseTinyPenpen</div>
             <div class="chain-info">
@@ -50,10 +51,9 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
     <script>
-        const TARGET_CHAIN_ID = "0x1"; // Ethereum Mainnet
+        const TARGET_CHAIN_ID = "0x1";
         const MINT_PRICE_ETH = "0.005"; 
         const CONTRACT_ADDRESS = "0xC04dE60292580b9b7f01d610785309f6Bd1690aF";
-
         const CONTRACT_ABI = ["function claim(address receiver, uint256 quantity, address currency, uint256 pricePerToken, (bytes32[] proofs, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) allowlistProof, bytes data) payable"];
         
         let provider, signer, contract;
@@ -62,37 +62,23 @@
         const statusMessage = document.getElementById('statusMessage');
 
         async function connectWallet() {
-            statusMessage.textContent = "接続中...";
             if (typeof window.ethereum !== 'undefined') {
                 try {
                     await window.ethereum.request({ method: 'eth_requestAccounts' });
                     provider = new ethers.BrowserProvider(window.ethereum);
                     signer = await provider.getSigner();
-                    const { chainId } = await provider.getNetwork();
-                    
-                    if (ethers.toBeHex(chainId) !== TARGET_CHAIN_ID) {
-                        statusMessage.textContent = "Ethereumメインネットに切り替えてください。";
-                        try {
-                            await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: TARGET_CHAIN_ID }] });
-                        } catch (e) {
-                            statusMessage.textContent = "ネットワークの切り替えに失敗しました。";
-                        }
-                        return;
-                    }
-                    
-                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
                     const address = await signer.getAddress();
                     connectButton.style.display = 'none';
                     mintButton.style.display = 'block';
-                    statusMessage.textContent = `接続完了: ${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+                    statusMessage.textContent = `接続完了: ${address.substring(0, 6)}...`;
                 } catch (error) { statusMessage.textContent = "接続失敗。"; }
             } else { statusMessage.textContent = "MetaMaskが必要です。"; }
         }
 
         async function mintNFT() {
-            if (!contract) return;
+            if (!contract) contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
             mintButton.disabled = true;
-            statusMessage.textContent = "MetaMaskで承認してください...";
+            statusMessage.textContent = "承認してください...";
             try {
                 const priceInWei = ethers.parseEther(MINT_PRICE_ETH);
                 const tx = await contract.claim(
@@ -100,13 +86,10 @@
                     { proofs: [], quantityLimitPerWallet: 0, pricePerToken: priceInWei, currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" }, "0x",
                     { value: priceInWei }
                 );
-                statusMessage.textContent = "送信中...";
                 await tx.wait();
                 statusMessage.textContent = "ミント成功！🎉";
-            } catch (error) { 
-                console.error(error);
-                statusMessage.textContent = "失敗しました。価格やガス代を確認してください。"; 
-            } finally { mintButton.disabled = false; }
+            } catch (error) { statusMessage.textContent = "失敗しました。"; }
+            finally { mintButton.disabled = false; }
         }
         connectButton.addEventListener('click', connectWallet);
         mintButton.addEventListener('click', mintNFT);
