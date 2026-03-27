@@ -10,7 +10,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Kiwi Maru', serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .mint-card { background-color: var(--card-bg); border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; overflow: hidden; text-align: center; border: 4px solid var(--primary-pink); }
-        .image-container { width: 100%; padding: 20px; background-color: var(--card-bg); }
+        .image-container { width: 100%; padding: 20px; background-color: var(--card-bg); min-height: 200px; }
         .nft-image { width: 100%; height: auto; border-radius: 20px; display: block; }
         .card-content { padding: 20px 30px 30px 30px; }
         .project-name { font-size: 24px; font-weight: 700; color: var(--primary-pink); margin-bottom: 5px; }
@@ -20,17 +20,17 @@
         .info-item { background-color: #F8F8F8; padding: 15px; border-radius: 15px; border: 1px solid #EEE; }
         .info-label { font-size: 12px; color: #888; margin-bottom: 5px; }
         .info-value { font-size: 18px; font-weight: 700; color: var(--text-color); }
-        .btn-connect { background-color: #333; color: white; border: none; padding: 15px 20px; border-radius: 50px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-connect:hover { background-color: #555; transform: translateY(-2px); }
-        .btn-mint { background-color: var(--primary-pink); color: white; border: none; padding: 15px 20px; border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer; width: 100%; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3); display: none; }
-        .btn-mint:hover { background-color: #FF1493; transform: translateY(-2px); }
-        #statusMessage { margin-top: 15px; font-size: 14px; color: #666; min-height: 1.2em; }
+        .btn-connect, .btn-mint { color: white; border: none; padding: 15px 20px; border-radius: 50px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-connect { background-color: #333; }
+        .btn-mint { background-color: var(--primary-pink); display: none; } /* 初期状態は非表示 */
+        .btn-connect:hover, .btn-mint:hover { transform: translateY(-2px); opacity: 0.9; }
+        #statusMessage { margin-top: 15px; font-size: 14px; color: #666; min-height: 1.5em; word-break: break-all; }
     </style>
 </head>
 <body>
     <div class="mint-card">
         <div class="image-container">
-            <img src="https://raw.githubusercontent.com/t-shiori/shiori-puni/main/index.jpg" alt="JapaneseTinyPenpen NFT" class="nft-image">
+            <img src="index.jpg" id="mainImage" alt="JapaneseTinyPenpen NFT" class="nft-image" onerror="this.src='https://raw.githubusercontent.com/t-shiori/shiori-puni/main/index.jpg';">
         </div>
         <div class="card-content">
             <div class="project-name">JapaneseTinyPenpen</div>
@@ -44,7 +44,7 @@
             </div>
             <button class="btn-connect" id="connectButton" onclick="connectWallet()">🔗 ウォレットを接続する</button>
             <button class="btn-mint" id="mintButton" onclick="mintNFT()">🐧 ミントする (1体)</button>
-            <div id="statusMessage">ウォレットを接続してミントしてください</div>
+            <div id="statusMessage">ウォレットを接続してください</div>
         </div>
     </div>
 
@@ -55,60 +55,47 @@
         const CONTRACT_ADDRESS = "0xC04dE60292580b9b7f01d610785309f6Bd1690aF";
         const CONTRACT_ABI = ["function claim(address receiver, uint256 quantity, address currency, uint256 pricePerToken, (bytes32[] proofs, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) allowlistProof, bytes data) payable"];
         
-        let provider, signer, contract;
+        let provider, signer;
+
+        // ページ読み込み時に接続済みかチェック
+        window.addEventListener('load', async () => {
+            if (window.ethereum) {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0) connectWallet();
+            }
+        });
 
         async function connectWallet() {
-            const statusMessage = document.getElementById('statusMessage');
-            const connectButton = document.getElementById('connectButton');
-            const mintButton = document.getElementById('mintButton');
+            const status = document.getElementById('statusMessage');
+            if (!window.ethereum) return alert("MetaMaskをインストールしてください");
 
-            if (window.ethereum) {
-                try {
-                    statusMessage.textContent = "メタマスクを起動中...";
-                    // 以前の要求方法から推奨される方法に変更
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    
-                    provider = new ethers.BrowserProvider(window.ethereum);
-                    signer = await provider.getSigner();
-                    const address = await signer.getAddress();
-                    
-                    connectButton.style.display = 'none';
-                    mintButton.style.display = 'block';
-                    statusMessage.textContent = `接続成功: ${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-                    
-                    console.log("Connected account:", address);
-                } catch (error) {
-                    console.error(error);
-                    statusMessage.textContent = "接続が拒否されました。";
-                }
-            } else {
-                statusMessage.textContent = "メタマスクが見つかりません。";
-                alert("MetaMaskがインストールされているか確認してください。");
-            }
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                
+                document.getElementById('connectButton').style.display = 'none';
+                document.getElementById('mintButton').style.display = 'flex';
+                status.textContent = `接続完了: ${accounts[0].substring(0, 6)}...${accounts[0].substring(38)}`;
+            } catch (e) { status.textContent = "接続エラー"; }
         }
 
         async function mintNFT() {
-            const statusMessage = document.getElementById('statusMessage');
+            const status = document.getElementById('statusMessage');
             if (!signer) return;
-
             try {
-                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-                const priceInWei = ethers.parseEther(MINT_PRICE_ETH);
-                
-                statusMessage.textContent = "メタマスクで承認してください...";
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                const price = ethers.parseEther(MINT_PRICE_ETH);
+                status.textContent = "メタマスクで承認してください...";
                 const tx = await contract.claim(
-                    await signer.getAddress(), 1, "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", priceInWei,
-                    { proofs: [], quantityLimitPerWallet: 0, pricePerToken: priceInWei, currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" }, "0x",
-                    { value: priceInWei }
+                    await signer.getAddress(), 1, "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", price,
+                    { proofs: [], quantityLimitPerWallet: 0, pricePerToken: price, currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" }, "0x",
+                    { value: price }
                 );
-                
-                statusMessage.textContent = "トランザクション送信中...";
+                status.textContent = "送信中...";
                 await tx.wait();
-                statusMessage.textContent = "ミント成功！🎉";
-            } catch (error) {
-                console.error(error);
-                statusMessage.textContent = "ミントに失敗しました。";
-            }
+                status.textContent = "ミント成功！🎉";
+            } catch (e) { status.textContent = "失敗しました"; }
         }
     </script>
 </body>
