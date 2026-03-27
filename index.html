@@ -6,331 +6,100 @@
     <title>JapaneseTinyPenpen Mint</title>
     <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@500;700&family=Space+Mono&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-pink: #FF69B4; /* イラストの背景色に近いピンク */
-            --bg-color: #FFF0F5; /* ラベンダーブラッシュ（ごく薄いピンク） */
-            --text-color: #333;
-            --card-bg: #FFFFFF;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Kiwi Maru', serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .mint-card {
-            background-color: var(--card-bg);
-            border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-            overflow: hidden;
-            text-align: center;
-            border: 4px solid var(--primary-pink);
-        }
-
-        .image-container {
-            width: 100%;
-            padding: 20px;
-            background-color: var(--card-bg);
-        }
-
-        .nft-image {
-            width: 100%;
-            height: auto;
-            border-radius: 20px;
-            display: block;
-        }
-
-        .card-content {
-            padding: 20px 30px 30px 30px;
-        }
-
-        .project-name {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary-pink);
-            margin-bottom: 5px;
-        }
-
-        .chain-info {
-            font-family: 'Space Mono', monospace;
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        .eth-icon {
-            width: 12px;
-            height: auto;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .info-item {
-            background-color: #F8F8F8;
-            padding: 15px;
-            border-radius: 15px;
-            border: 1px solid #EEE;
-        }
-
-        .info-label {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 5px;
-        }
-
-        .info-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-color);
-        }
-
-        /* ウォレット接続ボタン */
-        .btn-connect {
-            background-color: #333;
-            color: white;
-            border: none;
-            padding: 15px 20px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn-connect:hover {
-            background-color: #555;
-            transform: translateY(-2px);
-        }
-
-        /* ミントボタン（最初は非表示） */
-        .btn-mint {
-            background-color: var(--primary-pink);
-            color: white;
-            border: none;
-            padding: 15px 20px;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
-            display: none; /* 初期状態は非表示 */
-        }
-
-        .btn-mint:hover {
-            background-color: #FF1493;
-            transform: translateY(-2px);
-        }
-
-        .btn-mint:disabled {
-            background-color: #CCC;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        /* ステータス・エラーメッセージ */
-        #statusMessage {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #666;
-            min-height: 1.2em;
-        }
-
-        .error-text {
-            color: #D32F2F;
-        }
-
+        :root { --primary-pink: #FF69B4; --bg-color: #FFF0F5; --text-color: #333; --card-bg: #FFFFFF; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Kiwi Maru', serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .mint-card { background-color: var(--card-bg); border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; overflow: hidden; text-align: center; border: 4px solid var(--primary-pink); }
+        .image-container { width: 100%; padding: 20px; background-color: var(--card-bg); }
+        .nft-image { width: 100%; height: auto; border-radius: 20px; display: block; }
+        .card-content { padding: 20px 30px 30px 30px; }
+        .project-name { font-size: 24px; font-weight: 700; color: var(--primary-pink); margin-bottom: 5px; }
+        .chain-info { font-family: 'Space Mono', monospace; font-size: 14px; color: #888; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .eth-icon { width: 12px; height: auto; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .info-item { background-color: #F8F8F8; padding: 15px; border-radius: 15px; border: 1px solid #EEE; }
+        .info-label { font-size: 12px; color: #888; margin-bottom: 5px; }
+        .info-value { font-size: 18px; font-weight: 700; color: var(--text-color); }
+        .btn-connect { background-color: #333; color: white; border: none; padding: 15px 20px; border-radius: 50px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-connect:hover { background-color: #555; transform: translateY(-2px); }
+        .btn-mint { background-color: var(--primary-pink); color: white; border: none; padding: 15px 20px; border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer; width: 100%; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3); display: none; }
+        .btn-mint:hover { background-color: #FF1493; transform: translateY(-2px); }
+        .btn-mint:disabled { background-color: #CCC; cursor: not-allowed; box-shadow: none; }
+        #statusMessage { margin-top: 15px; font-size: 14px; color: #666; min-height: 1.2em; }
+        .error-text { color: #D32F2F; }
     </style>
 </head>
 <body>
-
     <div class="mint-card">
-        <div class="image-container">
-            <img src="index.jpg" alt="JapaneseTinyPenpen NFT" class="nft-image">
-        </div>
-        
+        <div class="image-container"><img src="index.png" alt="JapaneseTinyPenpen NFT" class="nft-image"></div>
         <div class="card-content">
             <div class="project-name">JapaneseTinyPenpen</div>
             <div class="chain-info">
                 <svg class="eth-icon" viewBox="0 0 784.37 1277.39" xmlns="http://www.w3.org/2000/svg"><g fill="#888"><path d="m392.19 0-7.22 24.61v854.72l7.22 7.21 392.18-231.81z"/><path d="m392.19 0-392.19 654.73 392.19 231.81v-356.54z"/><path d="m392.19 964.3-3.83 4.67v303.75l3.83 4.67 392.18-552.8z"/><path d="m392.19 1277.39v-313.09l-392.19-239.7z"/><path d="m392.19 886.55 392.18-231.82-392.18-179.12z"/><path d="m0 654.73 392.19 179.12v-356.54z"/></g></svg>
                 Ethereum Chain
             </div>
-
             <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">総発行枚数</div>
-                    <div class="info-value">2565 体</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">価格</div>
-                    <div class="info-value">??? ETH</div>
-                </div>
+                <div class="info-item"><div class="info-label">総発行枚数</div><div class="info-value">2565 体</div></div>
+                <div class="info-item"><div class="info-label">価格</div><div class="info-value">0.005 ETH</div></div>
             </div>
-
-            <button class="btn-connect" id="connectButton">
-                🔗 ウォレットを接続する
-            </button>
-            <button class="btn-mint" id="mintButton">
-                🐧 ミントする (1体)
-            </button>
-
+            <button class="btn-connect" id="connectButton">🔗 ウォレットを接続する</button>
+            <button class="btn-mint" id="mintButton">🐧 ミントする (1体)</button>
             <div id="statusMessage">ウォレットを接続してミントしてください</div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
-    
     <script>
-        // --- 設定エリア (必要に応じて書き換えてください) ---
-        // Ethereum メインネットのチェーンID (0x1 = 1)
         const TARGET_CHAIN_ID = "0x1"; 
-        
-        // 【重要】あなたのNFTコントラクトアドレスをここに入れてください
-        const CONTRACT_ADDRESS = "0xここにあなたのコントラクトアドレスを貼り付けてください"; 
+        const MINT_PRICE_ETH = "0.005"; 
+        const CONTRACT_ADDRESS = "0x93361E9D7C22e6A76318856Bc0B65780D1780004"; // あなたのアドレスに書き換え済み！
 
-        // ミント機能のABI (ethers.jsでclaim関数を呼ぶために必要)
-        const CONTRACT_ABI = [
-            "function claim(address receiver, uint256 quantity, address currency, uint256 pricePerToken, (bytes32[] proofs, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) allowlistProof, bytes data) payable"
-        ];
-        // --- 設定エリア ここまで ---
-
-        let provider;
-        let signer;
-        let contract;
-
+        const CONTRACT_ABI = ["function claim(address receiver, uint256 quantity, address currency, uint256 pricePerToken, (bytes32[] proofs, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) allowlistProof, bytes data) payable"];
+        let provider, signer, contract;
         const connectButton = document.getElementById('connectButton');
         const mintButton = document.getElementById('mintButton');
         const statusMessage = document.getElementById('statusMessage');
 
-        // ウォレット接続関数
         async function connectWallet() {
             statusMessage.textContent = "接続中...";
-            statusMessage.classList.remove('error-text');
-
             if (typeof window.ethereum !== 'undefined') {
                 try {
-                    // 1. MetaMaskに接続リクエスト
                     await window.ethereum.request({ method: 'eth_requestAccounts' });
                     provider = new ethers.BrowserProvider(window.ethereum);
                     signer = await provider.getSigner();
-                    
-                    // 2. ネットワークチェック (Ethereumメインネットか？)
                     const { chainId } = await provider.getNetwork();
                     if (ethers.toBeHex(chainId) !== TARGET_CHAIN_ID) {
                         statusMessage.textContent = "Ethereumメインネットに切り替えてください。";
-                        statusMessage.classList.add('error-text');
-                        // ネットワーク切り替えを促す
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: TARGET_CHAIN_ID }],
-                        });
-                        return; // 切り替え待ちのため一旦終了
+                        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: TARGET_CHAIN_ID }] });
+                        return;
                     }
-
-                    // 3. コントラクトインスタンス作成
                     contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-                    // 4. UI更新 (接続ボタンを隠してミントボタンを表示)
                     const address = await signer.getAddress();
-                    const shortAddress = address.substring(0, 6) + "..." + address.substring(address.length - 4);
-                    
                     connectButton.style.display = 'none';
                     mintButton.style.display = 'block';
-                    statusMessage.textContent = `接続完了: ${shortAddress}`;
-                    
-                } catch (error) {
-                    console.error(error);
-                    statusMessage.textContent = "接続に失敗しました。";
-                    statusMessage.classList.add('error-text');
-                }
-            } else {
-                statusMessage.textContent = "MetaMaskをインストールしてください。";
-                statusMessage.classList.add('error-text');
-            }
+                    statusMessage.textContent = `接続完了: ${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+                } catch (error) { statusMessage.textContent = "接続失敗。"; }
+            } else { statusMessage.textContent = "MetaMaskが必要です。"; }
         }
 
-        // ミント関数
         async function mintNFT() {
             if (!contract) return;
-
             mintButton.disabled = true;
-            mintButton.textContent = "ミント中...";
-            statusMessage.textContent = "MetaMaskでトランザクションを承認してください...";
-            statusMessage.classList.remove('error-text');
-
+            statusMessage.textContent = "MetaMaskで承認してください...";
             try {
-                // thirdwebのclaim関数を呼び出す (1体ミント、通貨はETH)
-                // ※価格が不明なため、valueは0で設定しています。
-                // 価格が必要な場合は、thirdwebのclaimConditionsから取得してここに設定する必要があります。
+                const priceInWei = ethers.parseEther(MINT_PRICE_ETH);
                 const tx = await contract.claim(
-                    await signer.getAddress(), // 受け取り手
-                    1, // 数量
-                    "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", // ETHを指定する特別なアドレス
-                    0, // 価格 ( claimConditionsで設定された価格 )
-                    {
-                        proofs: [],
-                        quantityLimitPerWallet: 0,
-                        pricePerToken: 0,
-                        currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
-                    },
-                    "0x", // data
-                    { value: 0 } // 実際に支払うETH量。価格が設定されている場合はここに記述が必要
+                    await signer.getAddress(), 1, "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", priceInWei,
+                    { proofs: [], quantityLimitPerWallet: 0, pricePerToken: priceInWei, currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" }, "0x",
+                    { value: priceInWei }
                 );
-
-                statusMessage.textContent = "トランザクション送信中...";
-                await tx.wait(); // 着金を待つ
-
-                statusMessage.textContent = "ミントに成功しました！🎉";
-            } catch (error) {
-                console.error(error);
-                statusMessage.textContent = "ミントに失敗しました。ガス代や設定を確認してください。";
-                statusMessage.classList.add('error-text');
-            } finally {
-                mintButton.disabled = false;
-                mintButton.textContent = "🐧 ミントする (1体)";
-            }
+                statusMessage.textContent = "送信中...";
+                await tx.wait();
+                statusMessage.textContent = "ミント成功！🎉";
+            } catch (error) { statusMessage.textContent = "失敗しました。"; } finally { mintButton.disabled = false; }
         }
-
-        // イベントリスナー
         connectButton.addEventListener('click', connectWallet);
         mintButton.addEventListener('click', mintNFT);
-
-        // ネットワークやアカウントが変更されたらページをリロード
-        if (window.ethereum) {
-            window.ethereum.on('chainChanged', () => window.location.reload());
-            window.ethereum.on('accountsChanged', () => window.location.reload());
-        }
-
     </script>
 </body>
 </html>
