@@ -24,7 +24,6 @@
         .btn-connect:hover { background-color: #555; transform: translateY(-2px); }
         .btn-mint { background-color: var(--primary-pink); color: white; border: none; padding: 15px 20px; border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer; width: 100%; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3); display: none; }
         .btn-mint:hover { background-color: #FF1493; transform: translateY(-2px); }
-        .btn-mint:disabled { background-color: #CCC; cursor: not-allowed; box-shadow: none; }
         #statusMessage { margin-top: 15px; font-size: 14px; color: #666; min-height: 1.2em; }
     </style>
 </head>
@@ -43,8 +42,8 @@
                 <div class="info-item"><div class="info-label">総発行枚数</div><div class="info-value">2565 体</div></div>
                 <div class="info-item"><div class="info-label">価格</div><div class="info-value">0.005 ETH</div></div>
             </div>
-            <button class="btn-connect" id="connectButton">🔗 ウォレットを接続する</button>
-            <button class="btn-mint" id="mintButton">🐧 ミントする (1体)</button>
+            <button class="btn-connect" id="connectButton" onclick="connectWallet()">🔗 ウォレットを接続する</button>
+            <button class="btn-mint" id="mintButton" onclick="mintNFT()">🐧 ミントする (1体)</button>
             <div id="statusMessage">ウォレットを接続してミントしてください</div>
         </div>
     </div>
@@ -57,42 +56,60 @@
         const CONTRACT_ABI = ["function claim(address receiver, uint256 quantity, address currency, uint256 pricePerToken, (bytes32[] proofs, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) allowlistProof, bytes data) payable"];
         
         let provider, signer, contract;
-        const connectButton = document.getElementById('connectButton');
-        const mintButton = document.getElementById('mintButton');
-        const statusMessage = document.getElementById('statusMessage');
 
         async function connectWallet() {
-            if (typeof window.ethereum !== 'undefined') {
+            const statusMessage = document.getElementById('statusMessage');
+            const connectButton = document.getElementById('connectButton');
+            const mintButton = document.getElementById('mintButton');
+
+            if (window.ethereum) {
                 try {
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    statusMessage.textContent = "メタマスクを起動中...";
+                    // 以前の要求方法から推奨される方法に変更
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    
                     provider = new ethers.BrowserProvider(window.ethereum);
                     signer = await provider.getSigner();
                     const address = await signer.getAddress();
+                    
                     connectButton.style.display = 'none';
                     mintButton.style.display = 'block';
-                    statusMessage.textContent = `接続完了: ${address.substring(0, 6)}...`;
-                } catch (error) { statusMessage.textContent = "接続失敗。"; }
-            } else { statusMessage.textContent = "MetaMaskが必要です。"; }
+                    statusMessage.textContent = `接続成功: ${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+                    
+                    console.log("Connected account:", address);
+                } catch (error) {
+                    console.error(error);
+                    statusMessage.textContent = "接続が拒否されました。";
+                }
+            } else {
+                statusMessage.textContent = "メタマスクが見つかりません。";
+                alert("MetaMaskがインストールされているか確認してください。");
+            }
         }
 
         async function mintNFT() {
-            if (!contract) contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-            mintButton.disabled = true;
-            statusMessage.textContent = "承認してください...";
+            const statusMessage = document.getElementById('statusMessage');
+            if (!signer) return;
+
             try {
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
                 const priceInWei = ethers.parseEther(MINT_PRICE_ETH);
+                
+                statusMessage.textContent = "メタマスクで承認してください...";
                 const tx = await contract.claim(
                     await signer.getAddress(), 1, "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", priceInWei,
                     { proofs: [], quantityLimitPerWallet: 0, pricePerToken: priceInWei, currency: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" }, "0x",
                     { value: priceInWei }
                 );
+                
+                statusMessage.textContent = "トランザクション送信中...";
                 await tx.wait();
                 statusMessage.textContent = "ミント成功！🎉";
-            } catch (error) { statusMessage.textContent = "失敗しました。"; }
-            finally { mintButton.disabled = false; }
+            } catch (error) {
+                console.error(error);
+                statusMessage.textContent = "ミントに失敗しました。";
+            }
         }
-        connectButton.addEventListener('click', connectWallet);
-        mintButton.addEventListener('click', mintNFT);
     </script>
 </body>
 </html>
